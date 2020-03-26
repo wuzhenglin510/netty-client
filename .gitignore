@@ -1,0 +1,4 @@
+.idea/
+chat-client.iml
+target/
+**.DS_Store
