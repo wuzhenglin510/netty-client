@@ -1,10 +1,15 @@
 package com.chat.handler;
 
 import com.chat.proto.TopLevelDataOuterClass;
+import com.chat.proto.business.WordMessageOuterClass;
 import io.netty.channel.ChannelHandlerContext;
+import io.netty.channel.DefaultChannelPromise;
 import io.netty.channel.SimpleChannelInboundHandler;
+import io.netty.channel.VoidChannelPromise;
 import io.netty.handler.timeout.IdleState;
 import io.netty.handler.timeout.IdleStateEvent;
+import io.netty.util.concurrent.Future;
+import io.netty.util.concurrent.GenericFutureListener;
 
 public class IdleDestroyHandler extends SimpleChannelInboundHandler<TopLevelDataOuterClass.TopLevelData> {
 
@@ -30,7 +35,11 @@ public class IdleDestroyHandler extends SimpleChannelInboundHandler<TopLevelData
                             .setType(TopLevelDataOuterClass.TopLevelData.Type.PING)
                             .setSendTime(System.nanoTime())
                             .build();
-                    ctx.writeAndFlush(pingMessage);
+                    ctx.channel().writeAndFlush(pingMessage, new DefaultChannelPromise(ctx.channel()).addListener(new GenericFutureListener<Future<? super Void>>() {
+                        public void operationComplete(Future<? super Void> future) throws Exception {
+                            System.out.println("send ping");
+                        }
+                    }));
                 }
             }
         }
@@ -39,10 +48,8 @@ public class IdleDestroyHandler extends SimpleChannelInboundHandler<TopLevelData
     protected void channelRead0(ChannelHandlerContext channelHandlerContext, TopLevelDataOuterClass.TopLevelData topLevelData) throws Exception {
         lossPongTimes = 0;
         if (topLevelData.getType().equals(TopLevelDataOuterClass.TopLevelData.Type.PONG)) {
-            System.out.println("IDLE, 直接结束");
-            return;
+            System.out.println("receive pong");
         } else {
-            System.out.println("IDLE, 叫下一个流程继续处理");
             channelHandlerContext.fireChannelRead(topLevelData);
         }
     }

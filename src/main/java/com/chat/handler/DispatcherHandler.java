@@ -7,7 +7,7 @@ import io.netty.channel.SimpleChannelInboundHandler;
 public class DispatcherHandler extends SimpleChannelInboundHandler<TopLevelDataOuterClass.TopLevelData> {
 
     protected void channelRead0(ChannelHandlerContext channelHandlerContext, TopLevelDataOuterClass.TopLevelData topLevelData) throws Exception {
-        System.out.println("业务开始处理");
+        System.out.println("收到业务数据: " + topLevelData.toString());
     }
 
 }
